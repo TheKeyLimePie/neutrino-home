@@ -22,20 +22,24 @@
 	<body>
 		<canvas id="cv" width="400" height="300"></canvas>
 		<script>
+			sentences = ["THE MATRIX HAS YOU.", "I CAN'T LET YOU DO THAT, DAVE.", "DON'T MAKE LEMONADE.", "RISE AND SHINE.", "HER NAME IS CAROLINE.", "THE CAKE IS A LIE."];
 			showingmessage = false;
 			readspeed = 600;
 			defaultphrase = "NEUTRINO";
 			phrase = defaultphrase;
-			hue = Math.random() * 360;
+			/*hue = Math.random() * 360;
 			sat = Math.random() * 100 + 1;
-			val = Math.random() * 100 + 1;
+			val = Math.random() * 100 + 1;*/
+			hue = 0;
+			sat = 0;
+			val = (new Date()).getHours() >= 8 && (new Date()).getHours() <= 18 ? 15 : 100;
 			
 			function changePhrase(txt)
 			{
 				phrase = txt;
 			}
 			
-			function showText(string, i = -1)
+			function showText(string, callback = null, i = -1)
 			{
 				words = string.split(" ");
 				if(words.length == 0)
@@ -45,18 +49,23 @@
 				{
 					showingmessage = true;
 					changePhrase("");
-					window.setTimeout(function(){showText(string, i + 1)}, readspeed);
+					window.setTimeout(function(){showText(string, callback, i + 1)}, readspeed);
 				}
 				else if(i < words.length)
 				{
 					changePhrase(words[i]);
-					window.setTimeout(function(){showText(string, i + 1)}, readspeed);
+					window.setTimeout(function(){showText(string, callback, i + 1)}, readspeed);
 				}
 				else if(i == words.length)
 				{
 					changePhrase("");
-					window.setTimeout(function(){showingmessage = false; changePhrase(defaultphrase);}, readspeed);
+					window.setTimeout(function(){showingmessage = false; changePhrase(defaultphrase); if(callback != null){callback()}}, readspeed);
 				}
+			}
+			
+			function ramble()
+			{
+				window.setTimeout(function(){showText(sentences[Math.floor(Math.random() * sentences.length)], ramble, -1)}, Math.random() * 30000);
 			}
 			
 			function draw()
@@ -166,6 +175,7 @@
 				requestAnimationFrame(draw);
 			}
 			draw();
+			showText("SERVER IS ONLINE", ramble);
 		</script>
 	</body>
 </html>
