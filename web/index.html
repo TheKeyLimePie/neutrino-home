@@ -1,0 +1,108 @@
+<html>
+	<head>
+
+	</head>
+	<body style="width: 100%; height: 100%; display: block; margin: 0;">
+		<canvas id="cv" width="100%" height="100%">
+		</canvas>
+		<script>
+			hue = Math.random() * 360;
+			sat = Math.random() * 100 + 1;
+			val = Math.random() * 100 + 1;
+			function draw()
+			{
+				/*
+					c: canvas handle
+					radius: neutrino's radius
+				*/
+				function drawClock(c, radius)
+				{
+					var ctx = c.getContext("2d");
+					var innerRadius = radius - 1 / 8 * radius;
+					midX = c.width / 2;
+					midY = c.height / 2;
+					ctx.lineWidth = 2;
+					ctx.strokeStyle = val < 50 ? "#fff" : "#000";
+					var second = (new Date()).getSeconds() == 0 ? 60 : (new Date()).getSeconds();
+
+					for(var i = 0; i < second; i++)
+					{
+						var rad = (i + 1) / 60 * 2 * Math.PI;
+						var markerLength = 0;
+						if((i + 1) % 5 == 0)
+						{
+							markerLength += 1 / 24 * radius;
+						}
+						if((i + 1) % 15 == 0)
+						{
+							markerLength += 1 / 16 * radius;
+						}
+						ctx.beginPath();
+						ctx.moveTo(midX - Math.sin(-rad) * (innerRadius - markerLength), midY - Math.cos(-rad) * (innerRadius - markerLength));
+						ctx.lineTo(midX - Math.sin(-rad) * radius, midY - Math.cos(-rad) * radius);
+						ctx.stroke();
+					}
+				}
+				/*
+					c: canvas handle
+					radius: neutrino's radius
+				*/
+				function drawNeutrino(c, radius)
+				{
+					var ctx = c.getContext("2d");
+					ctx.beginPath();
+					ctx.arc(c.width / 2, c.height / 2, radius, 0, 2*Math.PI);
+					ctx.fillStyle = "hsl(" + hue + "," + sat + "%," + val + "%)";
+					ctx.fill();
+					
+					ctx.font = radius + "px serif";
+					ctx.fillStyle = val < 50 ? "#fff" : "#000";
+					ctx.textAlign = "center";
+					ctx.textBaseline = "middle";
+					var ny = 957;
+					ctx.fillText(String.fromCharCode(ny), c.width / 2, c.height / 2);
+				}
+				/*
+					c: canvas handle
+					radius: neutrino's radius
+					maxRadius: max radius covered by pulse
+					duration: pulse duration in seconds
+					pow: pow factor for pulse animation
+				*/
+				function drawPulse(c, radius, maxRadius, duration, pow)
+				{
+					var ctx = c.getContext("2d");
+					var t = (new Date()).getTime() % (1000 * duration);
+					t /= 1000 * duration; // linear in [0,1)
+					var pulseFactor = Math.log(1 + t * Math.pow(Math.E, pow)) / Math.log(1 + Math.pow(Math.E, pow)); // logarithmic in [0,1)
+					var width = maxRadius - radius;
+					
+					ctx.beginPath();
+					ctx.arc(c.width / 2, c.height / 2, radius + pulseFactor * width, 0, 2 * Math.PI);
+					//ctx.fillStyle = "hsla(" + hue + "," + sat + "%," + val + "%," + Math.cos(Math.PI / 4 + t * Math.PI / 4) + ")";
+					ctx.fillStyle = "hsla(" + hue + "," + sat + "%," + val + "%," + (1 - pulseFactor) + ")";
+					ctx.fill();
+				}
+				
+				var c = document.getElementById("cv");
+				var ctx = c.getContext("2d");
+				c.width = window.innerWidth;
+				c.height = window.innerHeight;
+				ctx.fillStyle = val < 50 ? "#fff" : "#000";
+				ctx.fillRect(0,0,cv.width, cv.height);
+				
+				var radius = window.innerHeight < window.innerWidth ? window.innerHeight : window.innerWidth;
+				radius /= 3;
+				radius /= 2;
+				var pulseRadius = Math.sqrt(Math.pow(window.innerHeight, 2) + Math.pow(window.innerWidth, 2));
+				pulseRadius /= 2;
+				drawPulse(c, radius, pulseRadius, 5, 4);
+				drawNeutrino(c, radius);
+				drawClock(c, radius);
+				
+				requestAnimationFrame(draw);
+			}
+			draw();
+		</script>
+	</body>
+</html>
