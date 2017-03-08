@@ -22,9 +22,9 @@
 	<body>
 		<canvas id="cv" width="400" height="300"></canvas>
 		<script>
-			sentences = ["THE MATRIX HAS YOU.", "I CAN'T LET YOU DO THAT, DAVE.", "DON'T MAKE LEMONADE.", "RISE AND SHINE.", "HER NAME IS CAROLINE.", "THE CAKE IS A LIE."];
+			sentences = ["THE MATRIX HAS YOU.", "I CAN'T LET YOU DO THAT, DAVE.", "DON'T MAKE LEMONADE.", "RISE AND SHINE.", "HER NAME IS CAROLINE.", "THE CAKE IS A LIE.", "REMOVED HEROBRINE.", "THE ANSWER IS 42.", "FOLLOW THE WHITE RABBIT.", "THERE CAN BE ONLY ONE."];
 			showingmessage = false;
-			readspeed = 600;
+			readspeed = 500;
 			defaultphrase = "NEUTRINO";
 			phrase = defaultphrase;
 			/*hue = Math.random() * 360;
@@ -39,6 +39,46 @@
 				phrase = txt;
 			}
 			
+			function hideTitle(callback = null, i = 0)
+			{
+				var title = defaultphrase;
+				title = title.split("");
+				var text = "";
+				for(var j = 0; j < title.length - i; j++)
+				{
+					text += title[j];
+				}
+				changePhrase(text);
+				if(text.length > 0)
+				{
+					window.setTimeout(function(){hideTitle(callback, i + 1)}, 30);
+				}
+				else if(callback != null)
+				{
+					callback();
+				}
+			}
+			
+			function showTitle(callback = null, i = 0)
+			{
+				var title = defaultphrase;
+				title = title.split("");
+				var text = "";
+				for(var j = 0; j < i; j++)
+				{
+					text += title[j];
+				}
+				changePhrase(text);
+				if(text != defaultphrase)
+				{
+					window.setTimeout(function(){showTitle(callback, i + 1)}, 30);
+				}
+				else if(callback != null)
+				{
+					callback();
+				}
+			}
+
 			function showText(string, callback = null, i = -1)
 			{
 				words = string.split(" ");
@@ -47,9 +87,7 @@
 				}
 				else if(i == -1)
 				{
-					showingmessage = true;
-					changePhrase("");
-					window.setTimeout(function(){showText(string, callback, i + 1)}, readspeed);
+					hideTitle(function(){showingmessage = true; window.setTimeout(function(){showText(string, callback, i + 1)}, readspeed)});
 				}
 				else if(i < words.length)
 				{
@@ -59,7 +97,8 @@
 				else if(i == words.length)
 				{
 					changePhrase("");
-					window.setTimeout(function(){showingmessage = false; changePhrase(defaultphrase); if(callback != null){callback()}}, readspeed);
+					showingmessage = false;
+					window.setTimeout(function(){showTitle(callback);}, readspeed);
 				}
 			}
 			
@@ -129,7 +168,14 @@
 					}
 					
 					ctx.font = 1 / 4 * radius + "px bin, sans-serif";
-					ctx.fillStyle = val < 50 ? "#fff" : "#000";
+					if(showingmessage)
+					{
+						ctx.fillStyle = val < 50 ? "#fff" : "#000";
+					}
+					else
+					{
+						ctx.fillStyle = "#33b5e5";
+					}
 					ctx.textAlign = "center";
 					ctx.textBaseline = "middle";
 					ctx.fillText(phrase, c.width / 2, c.height / 2);
@@ -175,7 +221,7 @@
 				requestAnimationFrame(draw);
 			}
 			draw();
-			showText("SERVER IS ONLINE", ramble);
+			showText("SERVER IS ONLINE.", ramble);
 		</script>
 	</body>
 </html>
