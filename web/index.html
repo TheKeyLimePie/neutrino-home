@@ -22,17 +22,75 @@
 	<body>
 		<canvas id="cv" width="400" height="300"></canvas>
 		<script>
-			sentences = ["THE MATRIX HAS YOU.", "I CAN'T LET YOU DO THAT, DAVE.", "DON'T MAKE LEMONADE.", "RISE AND SHINE.", "HER NAME IS CAROLINE.", "THE CAKE IS A LIE.", "REMOVED HEROBRINE.", "THE ANSWER IS 42.", "FOLLOW THE WHITE RABBIT.", "THERE CAN BE ONLY ONE."];
-			showingmessage = false;
-			readspeed = 500;
-			defaultphrase = "NEUTRINO";
-			phrase = defaultphrase;
-			/*hue = Math.random() * 360;
-			sat = Math.random() * 100 + 1;
-			val = Math.random() * 100 + 1;*/
+			SENTENCES = ["THE MATRIX HAS YOU.", "I CAN'T LET YOU DO THAT, DAVE.", "DON'T MAKE LEMONADE.", "RISE AND SHINE.", "HER NAME IS CAROLINE.", "THE CAKE IS A LIE.", "REMOVED HEROBRINE.", "THE ANSWER IS 42.", "FOLLOW THE WHITE RABBIT.", "THERE CAN BE ONLY ONE."];
+			SHOWINGMESSAGE = false;
+			READSPEED = 500;
+			DEFAULTPHRASE = "NEUTRINO";
+			
+			phrase = DEFAULTPHRASE;
 			hue = 0;
 			sat = 0;
 			val = (new Date()).getHours() >= 8 && (new Date()).getHours() <= 18 ? 15 : 100;
+			
+			function updateColourSet()
+			{
+				hue = 0;
+				sat = 0;
+				val = (new Date()).getHours() >= 8 && (new Date()).getHours() <= 18 ? 15 : 100;
+			}
+			
+			function getMainColour(opacity = 1)
+			{
+				updateColourSet();
+				return "hsla(" + hue + "," + sat + "%," + val + "%," + opacity + ")";
+			}
+			
+			function getDigitalClockColour()
+			{
+				updateColourSet();
+				return val < 50 ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.65)";
+			}
+			
+			function getPrimaryColour()
+			{
+				return "#33b5e5";
+			}
+			
+			function getBackgroundColour()
+			{
+				updateColourSet();
+				return val < 50 ? "#fff" : "#000";
+			}
+			
+			function getLoadingCircleColour()
+			{
+				updateColourSet();
+				return val < 50 ? "#fff" : "#000";
+			}
+			
+			function getMessageColour()
+			{
+				updateColourSet();
+				return val < 50 ? "#fff" : "#000";
+			}
+			
+			function getSecondsColour()
+			{
+				updateColourSet();
+				return val < 50 ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)";
+			}
+			
+			function get5SecondsColour()
+			{
+				updateColourSet();
+				return val < 50 ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.65)";
+			}
+			
+			function get15SecondsColour()
+			{
+				updateColourSet();
+				return val < 50 ? "#fff" : "#000";
+			}
 			
 			function changePhrase(txt)
 			{
@@ -41,7 +99,7 @@
 			
 			function hideTitle(callback = null, i = 0)
 			{
-				var title = defaultphrase;
+				var title = DEFAULTPHRASE;
 				title = title.split("");
 				var text = "";
 				for(var j = 0; j < title.length - i; j++)
@@ -61,7 +119,7 @@
 			
 			function showTitle(callback = null, i = 0)
 			{
-				var title = defaultphrase;
+				var title = DEFAULTPHRASE;
 				title = title.split("");
 				var text = "";
 				for(var j = 0; j < i; j++)
@@ -69,7 +127,7 @@
 					text += title[j];
 				}
 				changePhrase(text);
-				if(text != defaultphrase)
+				if(text != DEFAULTPHRASE)
 				{
 					window.setTimeout(function(){showTitle(callback, i + 1)}, 30);
 				}
@@ -87,24 +145,24 @@
 				}
 				else if(i == -1)
 				{
-					hideTitle(function(){showingmessage = true; window.setTimeout(function(){showText(string, callback, i + 1)}, readspeed)});
+					hideTitle(function(){SHOWINGMESSAGE = true; window.setTimeout(function(){showText(string, callback, i + 1)}, READSPEED)});
 				}
 				else if(i < words.length)
 				{
 					changePhrase(words[i]);
-					window.setTimeout(function(){showText(string, callback, i + 1)}, readspeed);
+					window.setTimeout(function(){showText(string, callback, i + 1)}, READSPEED);
 				}
 				else if(i == words.length)
 				{
 					changePhrase("");
-					showingmessage = false;
-					window.setTimeout(function(){showTitle(callback);}, readspeed);
+					SHOWINGMESSAGE = false;
+					window.setTimeout(function(){showTitle(callback);}, READSPEED);
 				}
 			}
 			
 			function ramble()
 			{
-				window.setTimeout(function(){showText(sentences[Math.floor(Math.random() * sentences.length)], ramble, -1)}, Math.random() * 30000);
+				window.setTimeout(function(){showText(SENTENCES[Math.floor(Math.random() * SENTENCES.length)], ramble)}, Math.random() * 30000);
 			}
 			
 			function draw()
@@ -120,37 +178,81 @@
 					midX = c.width / 2;
 					midY = c.height / 2;
 					ctx.lineWidth = 2;
-					var second = d.getSeconds() == 0 ? 60 : d.getSeconds();
-
-					for(var i = 0; i < second; i++)
+					var milliseconds = d.getMilliseconds();
+					var seconds = d.getSeconds();
+					var minutes = d.getMinutes();
+					var hours = d.getHours() % 12;
+					
+					// draw seconds indicators
+					for(var i = 0; i <= seconds; i++)
 					{
-						var rad = (i + 1) / 60 * 2 * Math.PI;
-						var markerLength = 1 / 8 * radius;
-						ctx.strokeStyle = val < 50 ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)";
-						if((i + 1) % 5 == 0)
+						var rad = i / 60 * 2 * Math.PI;
+						var indicatorLength = 1 / 8 * radius;
+						ctx.strokeStyle = getSecondsColour();
+						
+						// draw every fifth seconds indicator a little bit longer with a stronger colour, use primary colour for displaying the current hour
+						if(i % 5 == 0)
 						{
-							ctx.strokeStyle = val < 50 ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.65)";
-							markerLength += 1 / 24 * radius;
+							if(i / 5 == hours)
+							{
+								ctx.strokeStyle = getPrimaryColour();
+							}
+							else
+							{
+								ctx.strokeStyle = get5SecondsColour();
+							}
+							indicatorLength += 1 / 24 * radius;
 						}
-						if((i + 1) % 15 == 0)
+						if(i % 15 == 0)
 						{
-							ctx.strokeStyle = val < 50 ? "#fff" : "#000";
-							markerLength += 1 / 16 * radius;
+							if(i / 5 == hours)
+							{
+								ctx.strokeStyle = getPrimaryColour();
+							}
+							else
+							{
+								ctx.strokeStyle = get15SecondsColour();
+							}
+							
+							indicatorLength += 1 / 16 * radius;
 						}
 						ctx.beginPath();
 						ctx.moveTo(midX - Math.sin(-rad) * radius, midY - Math.cos(-rad) * radius);
-						if(i == second - 1 && d.getMilliseconds() <= 100)
+						
+						// animate the appearance of a new seconds indicator
+						if(i == seconds && milliseconds < 100)
 						{
-							var t = d.getMilliseconds() % 100;
+							var t = milliseconds % 100;
 							t /= 100;
-							ctx.lineTo(midX - Math.sin(-rad) * (radius - markerLength * t), midY - Math.cos(-rad) * (radius - markerLength * t));
+							ctx.lineTo(midX - Math.sin(-rad) * (radius - indicatorLength * t), midY - Math.cos(-rad) * (radius - indicatorLength * t));
 						}
 						else
 						{
-							ctx.lineTo(midX - Math.sin(-rad) * (radius - markerLength), midY - Math.cos(-rad) * (radius - markerLength));
+							ctx.lineTo(midX - Math.sin(-rad) * (radius - indicatorLength), midY - Math.cos(-rad) * (radius - indicatorLength));
 						}
 						ctx.stroke();
 					}
+					
+					// draw the minutes indicator circle
+					var rad = minutes / 60 * 2 * Math.PI;
+					var radprev = (minutes - 1 < 0 ? 0 : minutes - 1) / 60 * 2 * Math.PI;
+					var rotation = -Math.PI / 2;
+					ctx.beginPath();
+					ctx.strokeStyle = getPrimaryColour();
+					ctx.lineWidth = 5;
+					
+					// animate the indicator circle
+					if(seconds == 0 && milliseconds <= 100)
+					{
+						var t = milliseconds % 100;
+						t /= 100;
+						ctx.arc(c.width / 2, c.height / 2, radius, 0 + rotation, radprev + rotation + t * (rad - radprev));
+					}
+					else
+					{
+						ctx.arc(c.width / 2, c.height / 2, radius, 0 + rotation, rad + rotation);
+					}
+					ctx.stroke();
 				}
 				/*
 					c: canvas handle
@@ -164,35 +266,34 @@
 					var ctx = c.getContext("2d");
 					ctx.beginPath();
 					ctx.arc(c.width / 2, c.height / 2, radius, 0, 2 * Math.PI);
-					ctx.fillStyle = "hsl(" + hue + "," + sat + "%," + val + "%)";
+					ctx.fillStyle = getMainColour();
 					ctx.fill();
+					ctx.font = 1 / 4 * radius + "px bin, sans-serif";
+					ctx.textAlign = "center";
 					
-					if(showingmessage)
+					// draw loading circle spinning inside the clock
+					if(SHOWINGMESSAGE)
 					{
-						ctx.strokeStyle = val < 50 ? "#fff" : "#000";
+						ctx.strokeStyle = getLoadingCircleColour();
 						ctx.lineWidth = 3;
 						ctx.beginPath();
 						var startangle = t * 2 * Math.PI;
 						ctx.arc(c.width / 2, c.height / 2, radius - 1 / 4 * radius, startangle, startangle + Math.PI / 6);
 						ctx.stroke();
+						ctx.fillStyle = getMessageColour();
+					}
+					if(!SHOWINGMESSAGE)
+					{
+						ctx.fillStyle = getPrimaryColour();
 					}
 					
-					ctx.font = 1 / 4 * radius + "px bin, sans-serif";
-					if(showingmessage)
-					{
-						ctx.fillStyle = val < 50 ? "#fff" : "#000";
-					}
-					else
-					{
-						ctx.fillStyle = "#33b5e5";
-					}
-					ctx.textAlign = "center";
+					// draw text inside the clock
 					ctx.textBaseline = "middle";
 					ctx.fillText(phrase, c.width / 2, c.height / 2);
 					
-					ctx.textAlign = "center";
+					// draw clock time
 					ctx.textBaseline = "bottom";
-					ctx.fillStyle = val < 50 ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.65)";
+					ctx.fillStyle = getDigitalClockColour();
 					var hrs = d.getHours() < 10 ? "0" : "";
 					hrs += d.getHours();
 					var minutes = d.getMinutes() < 10 ? "0" : "";
@@ -219,23 +320,24 @@
 					
 					ctx.beginPath();
 					ctx.arc(c.width / 2, c.height / 2, radius + pulseFactor * width, 0, 2 * Math.PI);
-					//ctx.fillStyle = "hsla(" + hue + "," + sat + "%," + val + "%," + Math.cos(Math.PI / 4 + t * Math.PI / 4) + ")";
-					ctx.fillStyle = "hsla(" + hue + "," + sat + "%," + val + "%," + (1 - pulseFactor) + ")";
+					//ctx.fillStyle = getMainColour(Math.cos(Math.PI / 4 + t * Math.PI / 4));
+					ctx.fillStyle = getMainColour(1 - pulseFactor);
 					ctx.fill();
 				}
 				
+				// canvas setup
 				var c = document.getElementById("cv");
 				var ctx = c.getContext("2d");
 				c.width = window.innerWidth;
 				c.height = window.innerHeight;
-				ctx.fillStyle = val < 50 ? "#fff" : "#000";
+				ctx.fillStyle = getBackgroundColour();
 				ctx.fillRect(0,0,cv.width, cv.height);
 				
 				var radius = window.innerHeight < window.innerWidth ? window.innerHeight : window.innerWidth;
 				radius /= 3;
-				radius /= 2;
 				var pulseRadius = Math.sqrt(Math.pow(window.innerHeight, 2) + Math.pow(window.innerWidth, 2));
 				pulseRadius /= 2;
+				
 				drawPulse(c, radius, pulseRadius, 5, 4);
 				drawNeutrino(c, radius);
 				drawClock(c, radius);
