@@ -116,16 +116,16 @@
 				function drawClock(c, radius)
 				{
 					var ctx = c.getContext("2d");
-					var innerRadius = radius - 1 / 8 * radius;
+					var d = new Date();
 					midX = c.width / 2;
 					midY = c.height / 2;
 					ctx.lineWidth = 2;
-					var second = (new Date()).getSeconds() == 0 ? 60 : (new Date()).getSeconds();
+					var second = d.getSeconds() == 0 ? 60 : d.getSeconds();
 
 					for(var i = 0; i < second; i++)
 					{
 						var rad = (i + 1) / 60 * 2 * Math.PI;
-						var markerLength = 0;
+						var markerLength = 1 / 8 * radius;
 						ctx.strokeStyle = val < 50 ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)";
 						if((i + 1) % 5 == 0)
 						{
@@ -138,8 +138,17 @@
 							markerLength += 1 / 16 * radius;
 						}
 						ctx.beginPath();
-						ctx.moveTo(midX - Math.sin(-rad) * (innerRadius - markerLength), midY - Math.cos(-rad) * (innerRadius - markerLength));
-						ctx.lineTo(midX - Math.sin(-rad) * radius, midY - Math.cos(-rad) * radius);
+						ctx.moveTo(midX - Math.sin(-rad) * radius, midY - Math.cos(-rad) * radius);
+						if(i == second - 1 && d.getMilliseconds() <= 100)
+						{
+							var t = d.getMilliseconds() % 100;
+							t /= 100;
+							ctx.lineTo(midX - Math.sin(-rad) * (radius - markerLength * t), midY - Math.cos(-rad) * (radius - markerLength * t));
+						}
+						else
+						{
+							ctx.lineTo(midX - Math.sin(-rad) * (radius - markerLength), midY - Math.cos(-rad) * (radius - markerLength));
+						}
 						ctx.stroke();
 					}
 				}
@@ -149,7 +158,8 @@
 				*/
 				function drawNeutrino(c, radius)
 				{
-					var t = (new Date()).getTime() % (1000 * 1);
+					var d = new Date();
+					var t = d.getTime() % (1000 * 1);
 					t /= 1000 * 1;
 					var ctx = c.getContext("2d");
 					ctx.beginPath();
@@ -179,6 +189,18 @@
 					ctx.textAlign = "center";
 					ctx.textBaseline = "middle";
 					ctx.fillText(phrase, c.width / 2, c.height / 2);
+					
+					ctx.textAlign = "center";
+					ctx.textBaseline = "bottom";
+					ctx.fillStyle = val < 50 ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.65)";
+					var hrs = d.getHours() < 10 ? "0" : "";
+					hrs += d.getHours();
+					var minutes = d.getMinutes() < 10 ? "0" : "";
+					minutes += d.getMinutes();
+					var secs = d.getSeconds() < 10 ? "0" : "";
+					secs += d.getSeconds();
+					var time = hrs + ":" + minutes + ":" + secs;
+					ctx.fillText(time, c.width / 2, c.height / 2);
 				}
 				/*
 					c: canvas handle
