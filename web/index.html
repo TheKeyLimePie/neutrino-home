@@ -332,6 +332,11 @@
 				c.height = window.innerHeight;
 				ctx.fillStyle = getBackgroundColour();
 				ctx.fillRect(0,0,cv.width, cv.height);
+				var img = new Image();
+				img.src = "ntr.png";
+				var pat = ctx.createPattern(img, "repeat");
+				ctx.fillStyle = pat;
+				ctx.fillRect(0,0,cv.width, cv.height);
 				
 				var radius = window.innerHeight < window.innerWidth ? window.innerHeight : window.innerWidth;
 				radius /= 3;
